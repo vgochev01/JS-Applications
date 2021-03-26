@@ -102,9 +102,13 @@ class EditableList extends HTMLElement {
 
     addItem(ev) {
        const input = ev.target.parentNode.querySelector('input');
-       this.items.push(input.value);
-       input.value = '';
-       this.update();
+       if(input.value != ''){
+            this.items.push(input.value);
+            input.value = '';
+            this.update();
+        } else {
+            alert('Please fill the requied field!');
+        }
     }
 
     removeItem(ev) {
