@@ -14,6 +14,10 @@ export async function getMemeById(id) {
     return await api.get(host + 'data/memes/' + id);
 }
 
+export async function getMyMemes(userId) {
+    return await api.get(host + `data/memes?where=_ownerId%3D%22${userId}%22&sortBy=_createdOn%20desc`);
+}
+
 export async function createMeme(data) {
     return await api.post(host + 'data/memes', data);
 }

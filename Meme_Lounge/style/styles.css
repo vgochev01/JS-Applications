@@ -8,3 +8,11 @@
 @import './meme-details.css';
 @import './user-profile.css';
 @import './footer.css';
+
+.user .guest {
+    display: none;
+}
+
+#views {
+    display: none;
+}

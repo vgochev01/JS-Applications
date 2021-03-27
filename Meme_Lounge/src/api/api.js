@@ -58,17 +58,21 @@ export async function login(email, password) {
 
     sessionStorage.setItem('authToken', response.accessToken);
     sessionStorage.setItem('email', response.email);
+    sessionStorage.setItem('username', response.username);
     sessionStorage.setItem('userId', response._id);
+    sessionStorage.setItem('gender', response.gender);
 
     return response;
 }
 
-export async function register(email, username, password) {
-    const response = await post(settings.host + 'users/register', { email, username, password });
+export async function register(username, email, password, gender) {
+    const response = await post(settings.host + 'users/register', {username, email, password, gender });
 
     sessionStorage.setItem('authToken', response.accessToken);
+    sessionStorage.setItem('email', response.email);
     sessionStorage.setItem('username', response.username);
     sessionStorage.setItem('userId', response._id);
+    sessionStorage.setItem('gender', response.gender);
 
     return response;
 }
