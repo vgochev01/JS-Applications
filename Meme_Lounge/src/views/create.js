@@ -1,7 +1,9 @@
 import { html } from '../../node_modules/lit-html/lit-html.js';
 import { createMeme } from '../api/data.js';
+import { notify } from '../common/notification.js';
 
-const createTemplate = (onSubmit) => html`
+const createTemplate = (onSubmit, errMsg) => html`
+${errMsg ? notify(errMsg) : ''}
 <section id="create-meme">
     <form @submit=${onSubmit} id="create-form">
         <div class="container">
@@ -20,7 +22,12 @@ const createTemplate = (onSubmit) => html`
 
 
 export async function showCreate(ctx) {
-    ctx.render(createTemplate(onSubmit));
+    
+    updateView();
+
+    function updateView(errMsg) {
+        ctx.render(createTemplate(onSubmit, errMsg));
+    }
 
     async function onSubmit(ev) {
         ev.preventDefault();
@@ -30,11 +37,17 @@ export async function showCreate(ctx) {
         const imageUrl = formData.get('imageUrl');
 
         const entries = [...formData.entries()];
-        if(entries.some(([k, v]) => v == '')){
-            return alert('All fields are required!');
-        }
 
-        await createMeme({title, description, imageUrl});
-        ctx.page.redirect('/memes');
+        try {
+            if(entries.some(([k, v]) => v == '')){
+                throw new Error('All fields are required!');
+            }
+
+            await createMeme({title, description, imageUrl});
+            ctx.page.redirect('/memes');
+        } catch (err) {
+            updateView(err.message);
+            setTimeout(() => updateView(), 3000);
+        }
     }
 }

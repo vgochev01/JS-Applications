@@ -1,7 +1,9 @@
 import { html } from '../../node_modules/lit-html/lit-html.js';
 import { register } from '../api/data.js';
+import { notify } from '../common/notification.js';
 
 const registerTemplate = (onSubmit, errMsg) => html`
+${errMsg ? notify(errMsg) : ''}
 <section id="register">
     <form @submit=${onSubmit} id="register-form">
         <div class="container">
@@ -32,9 +34,13 @@ const registerTemplate = (onSubmit, errMsg) => html`
 export async function showRegister(ctx) {
     const authToken = sessionStorage.getItem('authToken');
     if(authToken == null){
-        ctx.render(registerTemplate(onSubmit));
+        updateView();
     } else {
         ctx.page.redirect('/memes');
+    }
+
+    function updateView(errMsg) {
+        ctx.render(registerTemplate(onSubmit, errMsg));
     }
 
     async function onSubmit(ev) {
@@ -47,17 +53,25 @@ export async function showRegister(ctx) {
         const gender = formData.get('gender');
 
         const entries = [...formData.entries()]
-        if(entries.some(([k, v]) => v == '')){
-            return alert('All fields are required!');
-        } 
 
-        if(password != repass){
-            return alert('Passwords must match!');
+        try {
+            if(entries.some(([k, v]) => v == '')){
+                throw new Error('All fields are required!');
+            } 
+
+            if(password != repass){
+                throw new Error('Passwords must match!');
+            }
+
+            await register(username, email, password, gender);
+
+            ev.target.reset();
+            ctx.page.redirect('/memes');
+            ctx.setUserNav();
+        } catch (err) {
+            updateView(err.message);
+            setTimeout(() => updateView(), 3000);
         }
 
-        await register(username, email, password, gender);
-        ev.target.reset();
-        ctx.page.redirect('/memes');
-        ctx.setUserNav();
     }
 }

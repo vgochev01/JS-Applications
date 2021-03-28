@@ -7,7 +7,7 @@ async function request(url, options) {
 
     if (response.ok == false) {
         const error = await response.json();
-        alert(error.message);
+        //alert(error.message);
         throw new Error(error.message);
     }
 

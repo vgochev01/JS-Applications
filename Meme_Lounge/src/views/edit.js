@@ -1,7 +1,9 @@
 import { html } from '/node_modules/lit-html/lit-html.js';
 import { getMemeById, editMeme } from '/src/api/data.js';
+import { notify } from '../common/notification.js';
 
-const editTemplate = (meme, onSubmit) => html`
+const editTemplate = (meme, onSubmit, errMsg) => html`
+${errMsg ? notify(errMsg) : ''}
 <section id="edit-meme">
     <form @submit=${onSubmit} id="edit-form">
         <h1>Edit Meme</h1>
@@ -24,7 +26,11 @@ export async function showEdit(ctx) {
     const id = ctx.params.id;
     const meme = await getMemeById(id);
 
-    ctx.render(editTemplate(meme, onSubmit));
+    updateView();
+
+    function updateView(errMsg) {
+        ctx.render(editTemplate(meme, onSubmit, errMsg));
+    }
 
     async function onSubmit(ev) {
         ev.preventDefault();
@@ -34,11 +40,16 @@ export async function showEdit(ctx) {
         const imageUrl = formData.get('imageUrl');
 
         const entries = [...formData.entries()];
-        if(entries.some(([k, v]) => v == '')){
-            return alert('All fields are required!');
-        }
+        try {
+            if(entries.some(([k, v]) => v == '')){
+                throw new Error('All fields are required!');
+            }
 
-        await editMeme(id, {title, description, imageUrl});
-        ctx.page.redirect('/details/' + id);
+            await editMeme(id, {title, description, imageUrl});
+            ctx.page.redirect('/details/' + id);
+        } catch (err) {
+            updateView(err.message);
+            setTimeout(() => updateView(), 3000);
+        }
     }
 }
