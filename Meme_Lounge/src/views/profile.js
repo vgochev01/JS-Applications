@@ -23,11 +23,11 @@ const profileTemplate = (memes, info, pageInfo) => html`
     <div class="pagination">
         <h4>Page ${pageInfo.page} of ${pageInfo.pagesCount}</h4>
         ${pageInfo.page > 1 ? html`
-            <a @click=${() => pageInfo.prevPage()} href="javascript:void(0)" id="pageBtn">Prev</a>
+            <a @click=${() => pageInfo.prevPage()} href="/profile?page=${Number(pageInfo.page)-1}" id="pageBtn">Prev</a>
         ` : '' }
 
         ${pageInfo.page < pageInfo.pagesCount ? html`
-            <a @click=${() => pageInfo.nextPage()} href="javascript:void(0)" id="pageBtn">Next</a>
+            <a @click=${() => pageInfo.nextPage()} href="/profile?page=${Number(pageInfo.page)+1}" id="pageBtn">Next</a>
         ` : ''}
     </div>
     <div class="user-meme-listings">
@@ -58,15 +58,20 @@ export async function showProfile(ctx) {
         pagesCount: Math.ceil(memesCount / 3),
         async nextPage() {
             this.page++;
-            await updateView(this.page);
         },
         async prevPage() {
             this.page--;
-            await updateView(this.page);
         }
     }
 
-    await updateView(pageInfo.page)
+    const querystring = ctx.querystring.split('=');
+    if(querystring && querystring[0] == 'page'){
+        const page = querystring[1]
+        pageInfo.page = page;
+    }
+
+    await updateView()
+
     async function updateView(){
         const memes = await getMyMemes(userId, pageInfo.page);
         ctx.render(profileTemplate(memes, info, pageInfo));

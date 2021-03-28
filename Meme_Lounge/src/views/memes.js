@@ -21,11 +21,11 @@ const memesTemplate = (memes, pageInfo) => html`
     <div class="pagination">
         <h4>Page ${pageInfo.page} of ${pageInfo.pagesCount}</h4>
         ${pageInfo.page > 1 ? html`
-            <a @click=${() => pageInfo.prevPage()} href="javascript:void(0)" id="pageBtn">Prev</a>
+            <a @click=${() => pageInfo.prevPage()} href="/memes?page=${Number(pageInfo.page)-1}" id="pageBtn">Prev</a>
         ` : '' }
 
         ${pageInfo.page < pageInfo.pagesCount ? html`
-            <a @click=${() => pageInfo.nextPage()} href="javascript:void(0)" id="pageBtn">Next</a>
+            <a @click=${() => pageInfo.nextPage()} href="/memes?page=${Number(pageInfo.page)+1}" id="pageBtn">Next</a>
         ` : ''}
     </div>
     <div id="memes">
@@ -42,17 +42,22 @@ const memesTemplate = (memes, pageInfo) => html`
 
 export async function showMemes(ctx) {
     const memesCount = await getCount();
+
     const pageInfo = {
         page: 1,
         pagesCount: Math.ceil(memesCount / 3),
         async nextPage() {
             this.page++;
-            await updateView();
         },
         async prevPage() {
             this.page--;
-            await updateView();
         }
+    }
+
+    const querystring = ctx.querystring.split('=');
+    if(querystring && querystring[0] == 'page'){
+        const page = querystring[1]
+        pageInfo.page = page;
     }
 
     await updateView()
