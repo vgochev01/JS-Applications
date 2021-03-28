@@ -1,5 +1,5 @@
 import { html } from '../../node_modules/lit-html/lit-html.js';
-import { getMyMemes } from '../api/data.js';
+import { getMyMemes, getCount } from '../api/data.js';
 
 const memeTemplate = (meme) => html`
 <div class="user-meme">
@@ -9,7 +9,7 @@ const memeTemplate = (meme) => html`
 </div>
 `;
 
-const profileTemplate = (memes, info) => html`
+const profileTemplate = (memes, info, pageInfo) => html`
 <section id="user-profile-page" class="user-profile">
     <article class="user-info">
         <img id="user-avatar-url" alt="user-profile" src="/images/${info.gender}.png">
@@ -20,6 +20,16 @@ const profileTemplate = (memes, info) => html`
         </div>
     </article>
     <h1 id="user-listings-title">User Memes</h1>
+    <div class="pagination">
+        <h4>Page ${pageInfo.page} of ${pageInfo.pagesCount}</h4>
+        ${pageInfo.page > 1 ? html`
+            <a @click=${() => pageInfo.prevPage()} href="javascript:void(0)" id="pageBtn">Prev</a>
+        ` : '' }
+
+        ${pageInfo.page < pageInfo.pagesCount ? html`
+            <a @click=${() => pageInfo.nextPage()} href="javascript:void(0)" id="pageBtn">Next</a>
+        ` : ''}
+    </div>
     <div class="user-meme-listings">
         <!-- Display : All created memes by this user (If any) --> 
         ${ memes.length > 0 ? 
@@ -34,8 +44,6 @@ const profileTemplate = (memes, info) => html`
 
 export async function showProfile(ctx) {
     const userId = sessionStorage.getItem('userId');
-    const memes = await getMyMemes(userId);
-
     const info = {
         userId,
         email: sessionStorage.getItem('email'),
@@ -43,8 +51,24 @@ export async function showProfile(ctx) {
         gender: sessionStorage.getItem('gender')
     }
 
-    console.log(info);
+    const memesCount = await getCount(userId);
 
+    const pageInfo = {
+        page: 1,
+        pagesCount: Math.ceil(memesCount / 3),
+        async nextPage() {
+            this.page++;
+            await updateView(this.page);
+        },
+        async prevPage() {
+            this.page--;
+            await updateView(this.page);
+        }
+    }
 
-    ctx.render(profileTemplate(memes, info));
+    await updateView(pageInfo.page)
+    async function updateView(){
+        const memes = await getMyMemes(userId, pageInfo.page);
+        ctx.render(profileTemplate(memes, info, pageInfo));
+    }
 }

@@ -1,5 +1,5 @@
 import { html } from '../../node_modules/lit-html/lit-html.js';
-import { getMemes } from '../api/data.js';
+import { getCount, getMemes } from '../api/data.js';
 
 const memeTemplate = (meme) => html`
 <div class="meme">
@@ -15,9 +15,19 @@ const memeTemplate = (meme) => html`
 </div>
 `;
 
-const memesTemplate = (memes) => html`
+const memesTemplate = (memes, pageInfo) => html`
 <section id="meme-feed">
     <h1>All Memes</h1>
+    <div class="pagination">
+        <h4>Page ${pageInfo.page} of ${pageInfo.pagesCount}</h4>
+        ${pageInfo.page > 1 ? html`
+            <a @click=${() => pageInfo.prevPage()} href="javascript:void(0)" id="pageBtn">Prev</a>
+        ` : '' }
+
+        ${pageInfo.page < pageInfo.pagesCount ? html`
+            <a @click=${() => pageInfo.nextPage()} href="javascript:void(0)" id="pageBtn">Next</a>
+        ` : ''}
+    </div>
     <div id="memes">
         <!-- Display : All memes in database ( If any ) -->
         ${ memes.length > 0 ? 
@@ -31,6 +41,24 @@ const memesTemplate = (memes) => html`
 `;
 
 export async function showMemes(ctx) {
-    const memes = await getMemes();
-    ctx.render(memesTemplate(memes));
+    const memesCount = await getCount();
+    const pageInfo = {
+        page: 1,
+        pagesCount: Math.ceil(memesCount / 3),
+        async nextPage() {
+            this.page++;
+            await updateView();
+        },
+        async prevPage() {
+            this.page--;
+            await updateView();
+        }
+    }
+
+    await updateView()
+
+    async function updateView(){
+        const memes = await getMemes(pageInfo.page);
+        ctx.render(memesTemplate(memes, pageInfo));
+    }
 }
