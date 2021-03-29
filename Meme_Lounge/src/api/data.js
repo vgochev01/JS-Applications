@@ -36,3 +36,7 @@ export async function getCount(userId) {
     }
     return await api.get(host + 'data/memes?count');
 }
+
+export async function searchMemes(match) {
+    return await api.get(host + `data/memes/?where=title${encodeURIComponent(`="${match}"`)}`)
+}

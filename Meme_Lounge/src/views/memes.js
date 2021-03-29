@@ -1,5 +1,7 @@
 import { html } from '../../node_modules/lit-html/lit-html.js';
-import { getCount, getMemes } from '../api/data.js';
+import { getCount, getMemes, searchMemes } from '../api/data.js';
+import { styleMap } from '../../node_modules/lit-html/directives/style-map.js';
+import { classMap } from '../../node_modules/lit-html/directives/class-map.js';
 
 const memeTemplate = (meme) => html`
 <div class="meme">
@@ -18,15 +20,23 @@ const memeTemplate = (meme) => html`
 const memesTemplate = (memes, pageInfo) => html`
 <section id="meme-feed">
     <h1>All Memes</h1>
-    <div class="pagination">
-        <h4>Page ${pageInfo.page} of ${pageInfo.pagesCount}</h4>
-        ${pageInfo.page > 1 ? html`
-            <a @click=${() => pageInfo.prevPage()} href="/memes?page=${Number(pageInfo.page)-1}" id="pageBtn">Prev</a>
-        ` : '' }
+    <div class="pageAndSearch">
+            <div style=${styleMap(pageInfo.showPagination ? {} : {display: 'none'})} class="pagination">
+                <h4>Page ${pageInfo.page} of ${pageInfo.pagesCount}</h4>
+                ${pageInfo.page > 1 ? html`
+                    <a @click=${() => pageInfo.prevPage()} href="/memes?page=${Number(pageInfo.page)-1}" id="pageBtn">Prev</a>
+                ` : '' }
 
-        ${pageInfo.page < pageInfo.pagesCount ? html`
-            <a @click=${() => pageInfo.nextPage()} href="/memes?page=${Number(pageInfo.page)+1}" id="pageBtn">Next</a>
-        ` : ''}
+                ${pageInfo.page < pageInfo.pagesCount ? html`
+                    <a @click=${() => pageInfo.nextPage()} href="/memes?page=${Number(pageInfo.page)+1}" id="pageBtn">Next</a>
+                ` : ''}
+            </div>
+        <div class=${classMap({'searchCentered': pageInfo.showPagination == false, 'searchBar': true})}>
+        <form @submit=${pageInfo.search} id="searchForm">
+            <input @focus=${(ev) => ev.target.style.border = '1px solid black'} type="text" name="match" placeholder="Search..." />
+            <input type="submit" value="Search" />
+        </form>
+        </div>
     </div>
     <div id="memes">
         <!-- Display : All memes in database ( If any ) -->
@@ -42,7 +52,7 @@ const memesTemplate = (memes, pageInfo) => html`
 
 export async function showMemes(ctx) {
     const memesCount = await getCount();
-
+    console.log(true);
     const pageInfo = {
         page: 1,
         pagesCount: Math.ceil(memesCount / 3),
@@ -51,7 +61,9 @@ export async function showMemes(ctx) {
         },
         async prevPage() {
             this.page--;
-        }
+        },
+        search: search,
+        showPagination: true
     }
 
     const querystring = ctx.querystring.split('=');
@@ -65,5 +77,20 @@ export async function showMemes(ctx) {
     async function updateView(){
         const memes = await getMemes(pageInfo.page);
         ctx.render(memesTemplate(memes, pageInfo));
+    }
+
+    async function search(ev) {
+        ev.preventDefault();
+        const match = ev.target.querySelector('input');
+        if(match.value != ''){
+            const memes = await searchMemes(match.value);
+            pageInfo.showPagination = false;
+            if(memes.length){
+                ev.target.reset();
+            }
+            ctx.render(memesTemplate(memes, pageInfo));
+        } else {
+            match.style.border = '1px solid red';
+        }
     }
 }
