@@ -33,7 +33,7 @@ const memesTemplate = (memes, pageInfo) => html`
             </div>
         <div class=${classMap({'searchCentered': pageInfo.showPagination == false, 'searchBar': true})}>
         <form @submit=${pageInfo.search} id="searchForm">
-            <input @focus=${(ev) => ev.target.style.border = '1px solid black'} type="text" name="match" placeholder="Search..." />
+            <input @focus=${(ev) => ev.target.style.borderColor = 'black'} type="text" name="match" placeholder="Search..." />
             <input type="submit" value="Search" />
         </form>
         </div>
@@ -90,7 +90,7 @@ export async function showMemes(ctx) {
             }
             ctx.render(memesTemplate(memes, pageInfo));
         } else {
-            match.style.border = '1px solid red';
+            match.style.borderColor = 'red';
         }
     }
 }
