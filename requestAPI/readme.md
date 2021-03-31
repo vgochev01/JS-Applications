@@ -26,6 +26,8 @@ _Returns an object:_
 
 #### Authentication
 ###### Register can receive optional params (username, gender etc)
+##### On login/register, store user information in sessionStorage
+##### On logout clear user data in sessionStorage
 * login(email, password) - makes a POST request to **/users/login using API.post() - returns response.json()
 * register(email, password) - makes a POST request to **/users/register using API.post() - returns response.json()
 * logout() - makes authorized GET request to **/users/logout - returns empty response
