@@ -9,13 +9,13 @@
     * If response.json() fails - return response
 * Return - response.json()
 
-* createOptions(method, data)
-    _Returns an object:_ 
-     * Method - GET as default
-     * Headers:
-        * Content-Type - if data is not undefined
-        * X-Authorization - if token is stored in session
-    * body - (if data) data as json
+#### createOptions(method, data)
+_Returns an object:_
+* Method - GET as default
+* Headers:
+    * Content-Type - if data is not undefined
+    * X-Authorization - if token is stored in session
+* body - (if data) data as json
 
 #### CRUD Functions
 ###### Pass received url & options to request()
