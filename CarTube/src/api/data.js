@@ -29,3 +29,7 @@ export async function editCar(id, data) {
 export async function deleteCar(id) {
     return await api.del(host + '/data/cars/' + id);
 }
+
+export async function searchByYear(year){
+    return await api.get(host + `/data/cars?where=year%3D${year}`)
+}
