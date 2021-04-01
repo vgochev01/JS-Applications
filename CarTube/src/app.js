@@ -7,6 +7,8 @@ import { showRegister } from './views/register.js';
 import { showCatalog } from './views/catalog.js';
 import { showCreate } from './views/create.js';
 import { showDetails } from './views/details.js';
+import { showEdit } from './views/edit.js';
+import { showProfile } from './views/profile.js';
 
 const main = document.getElementById('site-content');
 document.getElementById('logoutBtn').addEventListener('click', logoutHandler);
@@ -19,6 +21,9 @@ page('/register', decorateContext, showRegister);
 page('/catalog', decorateContext, showCatalog);
 page('/details/:id', decorateContext, showDetails);
 page('/create', decorateContext, showCreate);
+page('/edit/:id', decorateContext, showEdit);
+page('/profile', decorateContext, showProfile);
+
 page.start();
 
 function decorateContext(ctx, next){
