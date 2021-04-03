@@ -22,6 +22,7 @@ async function request(url, options = {}) {
 
     } catch (err) {
         console.error(err.message);
+        alert(err.message);
         throw err;
     }
 }
@@ -67,19 +68,19 @@ export async function del(url) {
 
 // AUTHENTICATION
 
-export async function login(username, password) {
-    const result = await post(settings.host + '/users/login', { username, password });
+export async function login(email, password) {
+    const result = await post(settings.host + '/users/login', { email, password });
     sessionStorage.setItem('authToken', result.accessToken);
     sessionStorage.setItem('userId', result._id);
-    sessionStorage.setItem('username', result.username);
+    sessionStorage.setItem('email', result.email);
     return result;
 }
 
-export async function register(username, password) {
-    const result = await post(settings.host + '/users/register', { username, password });
+export async function register(email, password) {
+    const result = await post(settings.host + '/users/register', { email, password });
     sessionStorage.setItem('authToken', result.accessToken);
     sessionStorage.setItem('userId', result._id);
-    sessionStorage.setItem('username', result.username);
+    sessionStorage.setItem('email', result.email);
     return result;
 }
 

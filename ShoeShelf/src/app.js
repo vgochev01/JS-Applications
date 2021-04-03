@@ -1,13 +1,24 @@
 import { render } from '../node_modules/lit-html/lit-html.js';
 import page from '../node_modules/page/page.mjs';
+import { logout } from './api/data.js';
+import { showCreate } from './views/create.js';
+import { showDetails } from './views/details.js';
+import { showEdit } from './views/edit.js';
 import { showHome } from './views/home.js';
+import { showLogin } from './views/login.js';
+import { showRegister } from './views/register.js';
 
 const main = document.getElementById("mainContent");
+document.getElementById('logoutBtn').addEventListener('click', logoutHandler);
 
 setUserNav();
 
 page('/', decorateContext, showHome);
-
+page('/details/:id', decorateContext, showDetails);
+page('/edit/:id', decorateContext, showEdit);
+page('/register', decorateContext, showRegister);
+page('/login', decorateContext, showLogin);
+page('/create', decorateContext, showCreate);
 page.start();
 
 function decorateContext(ctx, next) {
@@ -29,6 +40,7 @@ function setUserNav() {
 }
 
 async function logoutHandler(){
-    // await logout();
+    await logout();
+    setUserNav();
     page.redirect('/');
 }
